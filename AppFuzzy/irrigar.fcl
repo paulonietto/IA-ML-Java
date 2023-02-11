@@ -1,0 +1,52 @@
+FUNCTION_BLOCK simulador    // Início do bloco de definições
+    
+      VAR_INPUT               // Definição das variáveis de entrada
+          temperatura: REAL;
+          umidade: REAL;
+      END_VAR
+    
+      VAR_OUTPUT              // Definição das variáveis de saída
+          irrigacao: REAL;
+      END_VAR
+    
+      FUZZIFY temperatura       
+          // definição das partições fuzzy e seus intervalos para cada variável de entrada
+          TERM fria := (0, 1) (10, 1) (20, 0);
+          TERM media := (10, 0) (20, 1) (30, 0);
+          TERM quente := (20, 0) (30, 1) (50, 1);
+      END_FUZZIFY
+    
+    FUZZIFY umidade       
+          // definição das partições fuzzy e seus intervalos para cada variável de entrada
+          TERM baixa := (0, 1) (25, 1) (50, 0);
+          TERM media := (25, 0) (50, 1) (75, 0);
+          TERM alta := (50, 0) (75, 1) (100, 1);
+      END_FUZZIFY
+
+      DEFUZZIFY irrigacao
+          // definição das partições fuzzy e seus intervalos para cada variável de saída
+          TERM pequeno := (0, 1) (30, 1) (60, 0);
+          TERM medio := (30, 0) (60, 1) (90, 0);
+          TERM grande := (60, 0) (90, 1) (100, 1);
+          METHOD : COG;  // Método de defuzzificação (Padrão é o Centro de Gravidade)
+          DEFAULT := 0;  // Valor default caso nenhuma regra seja ativada
+      END_DEFUZZIFY
+    
+      RULEBLOCK No1
+          // Definição do conjunto de regras para o controlador Fuzzy. Este bloco irá descrever
+          // as correlações entre as partições da variável de entrada com uma partição da variável
+          // de saída
+           
+          AND : MIN;  // Método MIN utilizado no processamento do operador lógico AND
+          ACT : MIN;  // Método de ativação
+          ACCU : MAX; // método de acumulação
+    
+          // Início da descrição de cada regra
+          RULE 1 : IF temperatura IS fria AND umidade IS alta  THEN irrigacao IS pequeno;
+          RULE 2 : IF temperatura IS media AND umidade IS media  THEN irrigacao IS medio;
+          RULE 3 : IF temperatura IS fria AND umidade IS media  THEN irrigacao IS medio;
+          RULE 4 : IF temperatura IS quente AND umidade IS baixa  THEN irrigacao IS grande;
+    
+      END_RULEBLOCK
+    
+  END_FUNCTION_BLOCK

@@ -1,0 +1,38 @@
+FUNCTION_BLOCK simulador    // Início do bloco de definições
+    
+      VAR_INPUT               // Definição das variáveis de entrada
+          nome_variavel_entrada: REAL;
+      END_VAR
+    
+      VAR_OUTPUT              // Definição das variáveis de saída
+          nome_variavel_saida: REAL;
+      END_VAR
+    
+      FUZZIFY nome_variavel_entrada       
+          // definição das partições fuzzy e seus intervalos para cada variável de entrada
+          TERM PARTICAO_X := (0.0, 0) (10.0, 1) (20.0, 0)
+      END_FUZZIFY
+    
+      DEFUZZIFY nome_variavel_saida
+          // definição das partições fuzzy e seus intervalos para cada variável de saída
+           
+          TERM PARTICAO_Y := (0.0, 0) (50.0, 1) (100.0, 0) ;
+          METHOD : COG;  // COA centro de area, LM primeiro dos máximos, RM último dos máximos, COGS centro de gravidade ponderado, MM média dos máximos <- dá pau
+          DEFAULT := 0;  // Valor default caso nenhuma regra seja ativada
+      END_DEFUZZIFY
+    
+      RULEBLOCK No1
+          // Definição do conjunto de regras para o controlador Fuzzy. Este bloco irá descrever
+          // as correlações entre as partições da variável de entrada com uma partição da variável
+          // de saída
+           
+          AND : MIN;  // Método MIN utilizado no processamento do operador lógico AND
+          ACT : MIN;  // Método de ativação
+          ACCU : MAX; // método de acumulação
+    
+          // Início da descrição de cada regra
+          // RULE 1 : IF variavel_entrada1 IS PARTICAO1 AND variavel_entrada1 IS particao2  THEN variavel_saida IS particaoX;
+    
+      END_RULEBLOCK
+    
+  END_FUNCTION_BLOCK

@@ -1,0 +1,60 @@
+FUNCTION_BLOCK exemplo_fuzzy    // Início do bloco de definições
+    
+      VAR_INPUT               // Definição das variáveis de entrada
+          capacitacao: REAL;
+	experiencia: REAL;
+      END_VAR
+    
+      VAR_OUTPUT              // Definição das variáveis de saída
+          gratificacao: REAL;
+      END_VAR
+    
+      FUZZIFY capacitacao       
+          // definição das partições fuzzy e seus intervalos para cada variável de entrada
+          TERM fraca := (0, 1) (7.5, 0);
+	  TERM media := (0, 0) (7.5 ,1) (15, 0);
+	  TERM forte := (7.5, 0) (15, 1);
+      END_FUZZIFY
+
+      FUZZIFY experiencia       
+          // definição das partições fuzzy e seus intervalos para cada variável de entrada
+          TERM pouca := (0, 1) (15, 0);
+	  TERM media := (0, 0) (15 ,1) (30, 0);
+	  TERM muita := (15, 0) (30, 1);
+      END_FUZZIFY
+    
+      DEFUZZIFY gratificacao
+          // definição das partições fuzzy e seus intervalos para cada variável de saída
+           
+          TERM muito_baixa := (0, 1) (250, 0);
+	  TERM baixa := (0, 0) (250, 1) (500, 0);
+	  TERM media := (250, 0) (500, 1) (750, 0);
+	  TERM alta := (500, 0) (750, 1) (1000, 0);
+	  TERM muito_alta := (750, 0) (1000, 1);
+          METHOD : COG;  // COA centro de area, LM primeiro dos máximos, RM último dos máximos, COGS centro de gravidade ponderado, MM média dos máximos <- dá pau
+          DEFAULT := 0;  // Valor default caso nenhuma regra seja ativada
+      END_DEFUZZIFY
+    
+      RULEBLOCK No1
+          // Definição do conjunto de regras para o controlador Fuzzy. Este bloco irá descrever
+          // as correlações entre as partições da variável de entrada com uma partição da variável
+          // de saída
+           
+          AND : MIN;  // Método MIN utilizado no processamento do operador lógico AND
+          ACT : MIN;  // Método de ativação
+          ACCU : MAX; // método de acumulação
+    
+          // Início da descrição de cada regra
+          RULE 1 : IF capacitacao IS fraca AND experiencia IS pouca THEN gratificacao IS muito_baixa;
+	  RULE 2 : IF capacitacao IS fraca AND experiencia IS media THEN gratificacao IS baixa;
+	  RULE 3 : IF capacitacao IS fraca AND experiencia IS muita THEN gratificacao IS media;
+	  RULE 4 : IF capacitacao IS media AND experiencia IS pouca THEN gratificacao IS baixa;
+	  RULE 5 : IF capacitacao IS media AND experiencia IS media THEN gratificacao IS media;
+	  RULE 6 : IF capacitacao IS media AND experiencia IS muita THEN gratificacao IS alta;
+	  RULE 7 : IF capacitacao IS forte AND experiencia IS pouca THEN gratificacao IS media;
+	  RULE 8 : IF capacitacao IS forte AND experiencia IS media THEN gratificacao IS alta;
+	  RULE 9 : IF capacitacao IS forte AND experiencia IS muita THEN gratificacao IS muito_alta;
+    
+      END_RULEBLOCK
+    
+  END_FUNCTION_BLOCK
